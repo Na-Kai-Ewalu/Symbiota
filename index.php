@@ -45,7 +45,7 @@ header('Content-Type: text/html; charset=' . $CHARSET);
 			<div>
 				<h1>Welcome</h1>
 				<p>
-					This data portal has been established to steward data relating to the PROJECT. For more information, visit SITE.
+					This data portal has been established to steward data relating to Nā Kai 'Ewalu monitoring, stewardship projects and scientific publications. 
 				</p>
 			</div>
 		<!--

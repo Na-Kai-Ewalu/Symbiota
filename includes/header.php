@@ -46,7 +46,7 @@ $collectionSearchPage = !empty($SHOULD_USE_HARVESTPARAMS) ? '/collections/index.
 				</a>
 				<div class="brand-name">
 					<h1>Nā Kai ʻEwalu Data Hale</h1>
-					<h2>Kanaka ʻOiwi Community Held Data Portal</h2>
+					<h2>Kanaka ʻŌiwi Community Held Data Portal</h2>
 				</div>
 			</div>
 		</div>
