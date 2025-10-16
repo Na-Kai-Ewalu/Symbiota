@@ -1,8 +1,8 @@
 <?php
 include_once('../config/symbini.php');
-//if($LANG_TAG != 'en' && file_exists($SERVER_ROOT.'/content/lang/includes/useagepolicy_template.' . $LANG_TAG . '.php')) include_once($SERVER_ROOT.'/content/lang/includes/useagepolicy_template.' . $LANG_TAG . '.php');
-//else include_once($SERVER_ROOT . '/content/lang/includes/useagepolicy_template.en.php');
-//include_once ($SERVER_ROOT . '/classes/utilities/GeneralUtil.php');
+if($LANG_TAG != 'en' && file_exists($SERVER_ROOT.'/content/lang/includes/useagepolicy_template.' . $LANG_TAG . '.php')) include_once($SERVER_ROOT.'/content/lang/includes/useagepolicy_template.' . $LANG_TAG . '.php');
+else include_once($SERVER_ROOT . '/content/lang/includes/useagepolicy_template.en.php');
+include_once ($SERVER_ROOT . '/classes/utilities/GeneralUtil.php');
 
 header("Content-Type: text/html; charset=" . $CHARSET);
 $serverHost = GeneralUtil::getDomain();
@@ -11,7 +11,7 @@ $serverHost = GeneralUtil::getDomain();
 <html lang="en">
 
 <head>
-	<title><?php echo $DEFAULT_TITLE; ?> Data Access Requests</title>
+	<title><?php echo $DEFAULT_TITLE; ?> Data Usage Guidelines</title>
 	<?php
 	include_once($SERVER_ROOT . '/includes/head.php');
 	?>
@@ -24,11 +24,10 @@ $serverHost = GeneralUtil::getDomain();
 	?>
 	<div class="navpath">
 		<a href="<?php echo htmlspecialchars($CLIENT_ROOT, ENT_COMPAT | ENT_HTML401 | ENT_SUBSTITUTE); ?>/index.php">Home</a> &gt;&gt;
-		<b>Data Access Requests</b>
+		<b>Data Usage Guidelines</b>
 	</div>
 	<!-- This is inner text! -->
 	<div role="main" id="innertext">
-	<!--
 		<h1 class="page-heading">Guidelines for Acceptable Use of Data</h1>
 		<h2>Recommended Citation Formats</h2>
 		<p>Use one of the following formats to cite data retrieved from the <?php echo $DEFAULT_TITLE; ?> network:</p>
@@ -130,7 +129,6 @@ $serverHost = GeneralUtil::getDomain();
 		collected from all around the world. Some records may also include offensive language. These records do not reflect the portal community's current viewpoint but rather the
 		social attitudes and circumstances of the time period when specimens were collected or cataloged.
 		</p>
-			-->
 	</div>
 	<?php
 	include($SERVER_ROOT . '/includes/footer.php');
