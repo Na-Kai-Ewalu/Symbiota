@@ -45,7 +45,14 @@ header('Content-Type: text/html; charset=' . $CHARSET);
 			<div>
 				<h1>Welcome</h1>
 				<p>
+					Our collective, named Nā Kai ʻEwalu ("The Eight Currents"), brings together lawaiʻa and scientists under the guidance 
+					of elder fisher and marine steward Uncle Mac Poepoe. We partner skilled indigenous subsistence fishers with conventional 
+					scientists to use traditional knowledge and conventional scientific methods for studying pressing environmental and resource 
+					management questions across the island chain.
+				</p>
+				<p>
 					This data portal has been established to steward data relating to Nā Kai 'Ewalu monitoring, stewardship projects and scientific publications. 
+					Our project data are accessible through the "Data Sharing" page, linked in the menu above.
 				</p>
 			</div>
 		<!--

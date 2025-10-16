@@ -2,17 +2,17 @@
    ========================================================================== */
 :root {
   --header-bg-image: url("");
-  --header-bg-color: #4d7d5c; /** Transparent color if adding header bg-image **/
-  --header-font-color: #fff;
+  --header-bg-color: #ECEBF1; /** Transparent color if adding header bg-image **/
+  --header-font-color: #BDBDBD;
   --brand-font-size: 1.5rem;
   --logo-width: 120px;
-  --menu-top-bg-color: #9B9BAF;
+  --menu-top-bg-color: #ECEBF1;
   --menu-font-size: 1rem;
   --body-bg-color: #fafafa;
   --body-text-color: #000000;
   --body-font-size: 1rem;
   --body-font-family: "Open Sans", sans-serif;
-  --footer-bg-color: #e8f7ee;
+  --footer-bg-color: #ECEBF1;
   --heading-font-family: "Open Sans", sans-serif;
   --link-color: #094d92;
   --darkest-color: #000000;
