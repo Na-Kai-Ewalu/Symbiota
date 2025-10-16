@@ -42,7 +42,6 @@ header("Content-Type: text/html; charset=".$CHARSET);
 					<a href="<?= $CLIENT_ROOT . '/content/docs/FINAL_Supplementary_9_Rmarkdown.Rmd'?>" target="_blank" >R-Markdown file</a>
 				</li>
 			</div>
-
 		</div>
 		<?php
 		include($SERVER_ROOT.'/includes/footer.php');
