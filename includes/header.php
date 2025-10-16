@@ -63,23 +63,13 @@ $collectionSearchPage = !empty($SHOULD_USE_HARVESTPARAMS) ? '/collections/index.
 						</a>
 					</li>
 					<li>
-						<a href="<?= $CLIENT_ROOT . $collectionSearchPage ?>">
-							<?= $LANG['H_SEARCH'] ?>
+						<a href="<?= $CLIENT_ROOT ?>/misc/projectoverviews.php">
+							<?= $LANG['H_PROJECT_OVERVIEWS'] ?>
 						</a>
 					</li>
 					<li>
-						<a href="<?= $CLIENT_ROOT ?>/collections/map/index.php" rel="noopener noreferrer">
-							<?= $LANG['H_MAP_SEARCH'] ?>
-						</a>
-					</li>
-					<li>
-						<a href="<?= $CLIENT_ROOT ?>/checklists/index.php">
-							<?= $LANG['H_INVENTORIES'] ?>
-						</a>
-					</li>
-					<li>
-						<a href="<?= $CLIENT_ROOT ?>/imagelib/search.php">
-							<?= $LANG['H_IMAGES'] ?>
+						<a href="<?= $CLIENT_ROOT ?>/misc/datasharing.php" rel="noopener noreferrer">
+							<?= $LANG['H_DATA_SHARING'] ?>
 						</a>
 					</li>
 					<li>
@@ -88,13 +78,8 @@ $collectionSearchPage = !empty($SHOULD_USE_HARVESTPARAMS) ? '/collections/index.
 						</a>
 					</li>
 					<li>
-						<a href="https://docs.symbiota.org/about/" target="_blank" rel="noopener noreferrer">
-							<?= $LANG['H_HELP'] ?>
-						</a>
-					</li>
-					<li>
-						<a href='<?= $CLIENT_ROOT ?>/sitemap.php'>
-							<?= $LANG['H_SITEMAP'] ?>
+						<a href="<?= $CLIENT_ROOT ?>/misc/contacts.php">
+							<?= $LANG['H_CONTACTS'] ?>
 						</a>
 					</li>
 					<!--
