@@ -3,7 +3,7 @@
 :root {
   --header-bg-image: url("");
   --header-bg-color: #ECEBF1; /** Transparent color if adding header bg-image **/
-  --header-font-color: #BDBDBD;
+  --header-font-color: #000000;
   --brand-font-size: 1.5rem;
   --logo-width: 120px;
   --menu-top-bg-color: #9B9BAF;
