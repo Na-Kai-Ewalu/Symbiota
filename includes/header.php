@@ -63,27 +63,27 @@ $collectionSearchPage = !empty($SHOULD_USE_HARVESTPARAMS) ? '/collections/index.
 						</a>
 					</li>
 					<li>
-						<a href="<?= $CLIENT_ROOT . '/project-overviews.php' ?>">
+						<a href="<?= $CLIENT_ROOT . '/project-overviews' ?>">
 							<?= "Project Overviews" ?>
 						</a>
 					</li>
 					<li>
-						<a href="<?= $CLIENT_ROOT ?>/data-sharing.php">
+						<a href="<?= $CLIENT_ROOT ?>/data-sharing">
 							<?= "Data Sharing" ?>
 						</a>
 					</li>
 					<li>
-						<a href="<?= $CLIENT_ROOT ?>/data-access.php">
+						<a href="<?= $CLIENT_ROOT ?>/data-access">
 							<?= "Data Access Requests" ?>
 						</a>
 					</li>
 					<li>
-						<a href="<?= $CLIENT_ROOT ?>/contacts.php">
+						<a href="<?= $CLIENT_ROOT ?>/contacts">
 							<?= "Media & Contact" ?>
 						</a>
 					</li>
 					<li>
-						<a href="<?= $CLIENT_ROOT ?>/collaborators-hub.php">
+						<a href="<?= $CLIENT_ROOT ?>/collaborators-hub">
 							<?= "Collaborators Hub" ?>
 						</a>
 					</li>
