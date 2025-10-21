@@ -63,7 +63,7 @@ $collectionSearchPage = !empty($SHOULD_USE_HARVESTPARAMS) ? '/collections/index.
 						</a>
 					</li>
 					<li>
-						<a href="<?= $CLIENT_ROOT . '/project-overviews' ?>">
+						<a href="<?= $CLIENT_ROOT ?>/project-overviews">
 							<?= "Project Overviews" ?>
 						</a>
 					</li>
