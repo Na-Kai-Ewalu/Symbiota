@@ -41,7 +41,28 @@ header("Content-Type: text/html; charset=".$CHARSET);
 				<li>
 					<a href="<?= $CLIENT_ROOT . '/content/docs/FINAL_Supplementary_9_Rmarkdown.Rmd'?>" target="_blank" >R-Markdown file</a>
 				</li>
+				<li>
+					<a href="<?= $CLIENT_ROOT . '/content/docs/Poepoe_et.al_README.txt'?>" target="_blank" >README file</a>
+				</li>
 			</div>
+			<p>Raw data individual csv files</p>
+				<div id="innertext" style="margin-bottom:30px">
+				<li>
+					<a href="<?= $CLIENT_ROOT . '/content/docs/10a_raw-data.csv'?>" target="_blank" >10a_raw-data.csv</a>
+				</li>
+				<li>
+					<a href="<?= $CLIENT_ROOT . '/content/docs/10a_all-analysis.csv'?>" target="_blank" >10a_all-analysis.csv</a>
+				</li>
+				<li>
+					<a href="<?= $CLIENT_ROOT . '/content/docs/10a_p.csv'?>" target="_blank" >10a_p.csv</a>
+				</li>
+				<li>
+					<a href="<?= $CLIENT_ROOT . '/content/docs/10b_raw-data.csv'?>" target="_blank" >10b_raw-data.csv</a>
+				</li>
+				<li>
+					<a href="<?= $CLIENT_ROOT . '/content/docs/10b_all-analysis.csv'?>" target="_blank" >10b_all-analysis.csv</a>
+				</li>
+				</div>
 		</div>
 		<?php
 		include($SERVER_ROOT.'/includes/footer.php');
