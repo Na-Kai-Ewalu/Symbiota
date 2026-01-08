@@ -967,13 +967,6 @@ class OccurrenceEditorManager {
 					//If additional identifiers exist, NULL otherCatalogNumbers
 					if ($postArr['idvalue'][0]) $postArr['othercatalognumbers'] = '';
 
-					//If processing status was "unprocessed" and recordEnteredBy is null, populate with user login
-					$oldProcessingStatus = isset($oldValueArr['omoccurrences']['processingstatus']) ? $oldValueArr['omoccurrences']['processingstatus'] : '';
-					$oldRecordEnteredBy = isset($oldValueArr['omoccurrences']['recordenteredby']) ? $oldValueArr['omoccurrences']['recordenteredby'] : '';
-					if (!$oldRecordEnteredBy && ($oldProcessingStatus == 'unprocessed' || $oldProcessingStatus == 'stage 1')) {
-						$postArr['recordenteredby'] = $GLOBALS['USERNAME'];
-						$editFieldArr['omoccurrences'][] = 'recordenteredby';
-					}
 					//Version edits; add edits to omoccuredits
 					$sqlEditsBase = 'INSERT INTO omoccuredits(occid,reviewstatus,appliedstatus,uid,fieldname,fieldvaluenew,fieldvalueold) ' .
 						'VALUES (' . $this->occid . ',1,' . ($autoCommit ? '1' : '0') . ',' . $GLOBALS['SYMB_UID'] . ',';
@@ -1958,13 +1951,13 @@ class OccurrenceEditorManager {
 		}
 	}
 
-	public function getExsiccati() {
+	public function getExsiccati($occid) {
 		$retArr = array();
-		if (isset($GLOBALS['ACTIVATE_EXSICCATI']) && $GLOBALS['ACTIVATE_EXSICCATI'] && $this->occid) {
+		if (isset($GLOBALS['ACTIVATE_EXSICCATI']) && $GLOBALS['ACTIVATE_EXSICCATI'] && $occid) {
 			$sql = 'SELECT l.notes, l.ranking, l.omenid, n.exsnumber, t.ometid, t.title, t.abbreviation, t.editor ' .
 				'FROM omexsiccatiocclink l INNER JOIN omexsiccatinumbers n ON l.omenid = n.omenid ' .
 				'INNER JOIN omexsiccatititles t ON n.ometid = t.ometid ' .
-				'WHERE l.occid = ' . $this->occid;
+				'WHERE l.occid = ' . $occid;
 			//echo $sql;
 			$rs = $this->conn->query($sql);
 			if ($r = $rs->fetch_object()) {
