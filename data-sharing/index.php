@@ -33,7 +33,7 @@ header("Content-Type: text/html; charset=".$CHARSET);
 			</p>
 			<div id="innertext">
 				<li>
-					<a href="<?= $CLIENT_ROOT . '/content/docs/Poepoe_et_al_2025_Electronic_Supplementary_Materials.pdf'?>" target="_blank" >Tables and Figures #1-10</a>
+					<a href="<?= $CLIENT_ROOT . '/content/docs/Poepoe_et_al_2025_Electronic_Supplementary_Materials_updated-2-9-26.pdf'?>" target="_blank" >Tables and Figures #1-10</a>
 				</li>
 				<li>
 					<a href="<?= $CLIENT_ROOT . '/content/docs/Supplementary_10ab_Data-Tables.xlsx'?>" target="_blank" >Raw data</a>
