@@ -1,0 +1,844 @@
+---
+title: "UPDATED Supplementary9_Poepoe_et_al_RoyalB_Figures_and_Analysis"
+output:
+  html_document: default
+  pdf_document: default
+editor_options:
+  markdown:
+    wrap: 72
+---
+
+**Poepoe et al. Supplementary 9**
+**Quantitative Data Analysis**
+
+Thank you to the following statisticians for their review of the Linear Mixed Models section: Etaash Katiyar (Stanford University), Wesley Bian (Stanford University), Louis Reeve Stanley Davis (Stanford University), Jules Wyman (Washington University)
+
+**Set Up**
+
+```{r setup, include = FALSE}
+
+#Clear workspace
+rm(list=ls()) 
+
+# Set a default CRAN mirror
+options(repos = c(CRAN = "https://cloud.r-project.org"))
+
+```
+
+```{r}
+
+#Set working directory
+setwd("~/Desktop") 
+getwd()
+
+#For plotting
+install.packages('ggtext')
+install.packages('showtext')
+
+#Load libraries
+library(ggplot2)
+library(dplyr)
+#library(ggtext)     # Text rendering
+library(showtext)   # Custom fonts
+library(sysfonts)
+
+```
+
+**Analysis for Size at Spawn (All Islands)**
+
+## PART 1: Statistical testing against a theoretical distribution
+
+**Input:**
+
+1.  *10a_raw-data.csv*
+
+**Output:**
+
+1.  *10a_all-analysis.csv*
+
+2.  *10a_p\<0.001.csv*
+
+Load in CSV
+
+```{r}
+setwd("/Users/marina-work/Desktop")
+fig3data <-read.csv("10a_raw-data.csv") #Raw data used for making Figure 3
+head(fig3data)
+
+#Rename Columns
+#fig3data <- fig3data %>% rename(
+#  Date = Date..mm.dd.yyyy.,
+#  obs_FL = Observed.Fork.Length..mm.,
+#)
+
+#Format Columns
+fig3data$Trip <- paste(fig3data$Date, fig3data$Island, sep = "_")
+fig3data$Date <- as.Date(fig3data$Date,"%m/%d/%Y")
+fig3data$obs_FL <- as.numeric(fig3data$obs_FL)
+fig3data$Sex <- as.factor(fig3data$Sex)
+fig3data$Island <- as.factor(fig3data$Island)
+
+#Format data
+fig3data$Year <- format(fig3data$Date, '%Y')
+fig3data$Month <- format(fig3data$Date, '%m')
+
+#Separate Males and Females
+F_only <- fig3data %>%  filter(Sex == "Female")
+M_only <- fig3data %>%  filter(Sex == "Male")
+
+
+```
+
+Summarize data
+
+```{r}
+
+fig3table <- fig3data %>% 
+  group_by(Sex, Trip) %>% #create averages per trip
+  reframe(
+    Date = Date,
+    Year = Year,
+    Island = Island,
+    Sex = Sex,
+    obs_FL = obs_FL,
+    n= n(),
+) %>% 
+  group_by(Sex, Trip) %>% 
+  mutate(
+  k = mean(obs_FL)
+  ) %>% 
+  ungroup() %>%
+  select(Trip, Date, Year, Island, Sex, n, k) %>% 
+  distinct()
+
+```
+
+**Introducing three modeled scenarios**
+
+*Least Conservative (LC): 68% of data falls +/- 1 standard deviation
+from the mean*
+
+*Middle Conservative (LC): 95% of data falls +/- 2 standard deviations
+from the mean*
+
+*Highly Conservative (LC): 99.7% of data falls +/- 3 standard deviations
+from the mean*
+
+Adding expected values and setting scenario parameters
+
+```{r}
+#Expected values
+##Males size range (Rm): 200-250mm (mean = 225mmm)
+##Females size range (Rf) = 300-400mm (mean = 350mm)
+fig3table$Expected_mean <- 0
+fig3table$Expected_mean[fig3table$Sex=='Female'] <- 350
+fig3table$Expected_mean[fig3table$Sex=='Male'] <- 225
+
+
+## Calculating sigma for three scenarios where the range of male/female sizes is one, two and three standard deviations from the mean. 
+
+### Example: For LC (females), the range 400-300mm = 100mm. 100mm is +/- one standard deviation = two standard deviations total. Therefore sigma = 100mm/2 = 50mm. 
+
+### Example: For LC (males), the range 250-200mm = 50mm is +/- one standard deviation, so two standard deviations total. Therefore sigma = 50mm/2 = 25mm. 
+
+## Three scenarios:
+### Least Conservative (LC): Rm and Rf are one standard deviation (sigma = 50 for females and 25 for males)	
+### Middle Conservative (MC): Rm and Rf are two standard deviations (sigma = 25 for females and 12.5 for males)
+### Highly Conservative (HC): Rm and Rf are two standard deviations (sigma = 16.7 for females and 8.3 for males)
+
+#Create empty columns
+fig3table$LC_sigma <- 0
+fig3table$MC_sigma <- 0
+fig3table$HC_sigma <- 0
+
+#Assign parameter values
+fig3table$LC_sigma[fig3table$Sex=='Female'] <- 50
+fig3table$LC_sigma[fig3table$Sex=='Male'] <- 25
+fig3table$MC_sigma[fig3table$Sex=='Female'] <- 25
+fig3table$MC_sigma[fig3table$Sex=='Male'] <- 12.5
+fig3table$HC_sigma[fig3table$Sex=='Female'] <- 16.7
+fig3table$HC_sigma[fig3table$Sex=='Male'] <- 8.3
+
+#Make sure column is formatted correctly
+fig3table$n <- as.numeric(fig3table$n)
+
+```
+
+**Calculate Absolute Z-score, Probability Density Function and 2-tailed
+P-value**
+
+```{r}
+#Absolute Z score
+## absolute value (observed mean (k) - expected mean)/(sigma / sqrt(n))
+
+fig3analysis <- fig3table %>% mutate (
+  sqrt_n = sqrt(n),
+  means_difference = k-Expected_mean,
+  LC_absZ = abs(means_difference/(LC_sigma/(sqrt_n))),
+  MC_absZ = abs(means_difference/(MC_sigma/(sqrt_n))),
+  HC_absZ = abs(means_difference/(HC_sigma/(sqrt_n)))
+  )
+
+
+#Probability Density Function
+## apply the probability density function to the absolute z-score
+
+fig3analysis <- fig3analysis %>% mutate (
+  LC_pdf = pnorm(LC_absZ,mean = 0, sd = 1, lower.tail=TRUE),
+  MC_pdf = pnorm(MC_absZ,mean = 0, sd = 1, lower.tail=TRUE),
+  HC_pdf = pnorm(MC_absZ,mean = 0, sd = 1, lower.tail=TRUE)
+  )
+
+#Two-tailed p-value
+## 2*(1- Probability density function)
+
+fig3analysis <- fig3analysis %>% mutate (
+  LC_p_value = 2*(1-LC_pdf),
+  MC_p_value = 2*(1-MC_pdf),
+  HC_p_value = 2*(1-HC_pdf)
+  )
+  
+#Save csv
+#write.csv(fig3analysis, "10a_all-analysis.csv")
+  
+
+```
+
+**Looking at which fish observations are larger and smaller than
+expected under the three scenarios**
+
+```{r}
+#Least conservative scenario
+LC <- fig3analysis %>% filter(
+    LC_p_value <= 0.01
+  ) %>%  group_by(Island, Sex, Trip) %>% reframe(
+  n_island = n,
+  size_difference = mean(k) - Expected_mean,
+  mean_FL=mean(k),
+  Year = Year,
+  Date = Date
+) %>% distinct()
+
+#Middle conservative scenario
+MC <- fig3analysis %>% filter(
+    MC_p_value <= 0.01
+  ) %>%  group_by(Island, Sex, Trip) %>% reframe(
+  n_island = n,
+  size_difference = mean(k) - Expected_mean,
+  mean_FL=mean(k),
+  Year = Year,
+  Date = Date
+) %>% distinct()
+
+#Highly conservative scenario
+HC <- fig3analysis %>% filter(
+    HC_p_value <= 0.01
+  ) %>%  group_by(Island, Sex, Trip) %>% reframe(
+  n_island = n,
+  size_difference = mean(k) - Expected_mean,
+  mean_FL=mean(k),
+  Year = Year,
+  Date = Date
+) %>% distinct()
+
+#Interpretation:
+#Maui females are unexpectedly small
+#Oahu males are unexpectedly large
+
+#Kauai males are unexpectedly large
+#Hawai'i males are unexpectedly large
+#Molokai males are unexpectedly small 
+
+
+#save csv
+LC$scenario <- "LC"
+MC$scenario <- "MC"
+HC$scenario <- "HC"
+
+Fig3analysis_key <- rbind(LC, MC, HC)
+  
+write.csv(Fig3analysis_key, "10a_p<0.001.csv")
+
+
+```
+
+## PART 2: Linear models
+Results from PART 1: 
+
+1. In February and April 2024 on Maui fish are female at smaller sizes (270-300mm, instead of over 300mm). 
+
+2. In September 2024 on 'Oahu fish are male at larger sizes (350-380mm) compared to generational knowledge (Figure 3) and previous records
+
+Question: Are the findings from PART 1 confirmed through a modeling approach? Is moi size-at sex different across islands and years? What are the trends?
+
+Approach: Look at what factors contribute to differences in moi fork length using generalized linear mixed models. 
+
+Variables: Sex, Island, Month, Day-of-year, Year, Day count
+
+
+**Input:**
+
+1.  *10a_raw-data.csv*
+
+**Output:**
+
+```{r}
+
+#Load libraries
+library(lme4)
+library(emmeans)
+library(glmmTMB)
+library(DHARMa)
+library(MuMIn)
+library(ggplot2)
+library(dplyr)
+library(splines)
+library(AICcmodavg)
+install.packages("diptest"); library(diptest)
+
+setwd("/Users/marina-work/Desktop")
+getwd()
+lmm_data <- read.csv("10a_raw-data.csv")
+
+#Format data
+str(lmm_data)
+lmm_data$Sex <- as.factor(lmm_data$Sex)
+lmm_data$Island <- as.factor(lmm_data$Island)
+lmm_data$Year <- as.factor(lmm_data$Year)
+#lmm_data$Month <- as.factor(lmm_data$Month)
+lmm_data$Month_f <- as.factor(lmm_data$Month)
+lmm_data$Date <- as.Date(lmm_data$Date, "%Y-%m-%d")
+lmm_data$Day_of_year <- format(lmm_data$Date, "%j")
+lmm_data$Day_of_year <- as.numeric(lmm_data$Day_of_year)
+
+origin_date <- as.Date("2019-01-01")
+
+lmm_data <- lmm_data %>%
+  mutate(
+    Day_count = as.numeric(Date - origin_date) + 1
+  ) 
+
+```
+
+
+#Basic descriptions/spread of data
+```{r}
+with(lmm_data, table(Sex, Island)) #All sexes were sampled on all islands
+with(lmm_data, table(Sex, Month)) #not all sexes were sampled for all Months
+with(lmm_data, table(Island, Month)) #not all Islands were sampled for all Months
+
+table(lmm_data$Year, lmm_data$Island)
+table(lmm_data$Year, lmm_data$Sex)
+
+
+```
+
+
+
+#Distribution of outcome variable (Fork Length)
+```{r}
+#check for multi-modal distribution which is what we would expect for the different sexes
+hist(lmm_data$obs_FL) 
+ggplot(lmm_data, aes(x = obs_FL)) +
+  geom_density(fill = "skyblue", alpha = 0.7, color = "black") +
+  labs(
+    title = "Density Plot of Observed Fork Length (mm)",
+    subtitle = "Visual check for distinct peaks",
+    x = "Observed Fork Length",
+    y = "Density"
+  ) +
+  theme_minimal(base_size = 14)
+
+#dip_test_result <- dip.test(obs_fl_complete) #yes, fork length is multi-modally distributed. 
+
+```
+
+#Which variables to include
+Single variable: Sex, Island, Year, Month, Date
+Interactions: Sex:Island, Sex:Month, Island:Month
+Note: Cannot include 3-way interaction because of gaps in the data
+
+
+#Which distribution is most appropriate: Gamma vs. Normal
+```{r}
+#CRITERIA:
+#Are the residuals normally distributed?
+#Which distribution results in a better fitted model?
+#Note: Not enough data to fit interactive effect of Island:Month
+
+#Gamma distribution
+m1_gamma <- glmmTMB(obs_FL ~ Sex + Island + Year + Month + Sex:Island + Sex:Month + Island:Month, data = lmm_data, family=Gamma (link ="log") ) 
+plot(simulateResiduals(m1_gamma))
+summary(m1_gamma)
+AICc(m1_gamma) #1178
+
+#Normal distribution (gaussian)
+m1_normal <- glmmTMB(obs_FL ~ Sex + Island + Year + Month + Sex:Island + Sex:Month + Island:Month, data = lmm_data, family=gaussian ) 
+summary(m1_normal)
+plot(simulateResiduals(m1_normal))
+AICc(m1_normal) #1174
+
+#CONCLUSION: Use normal distribution
+#Models perform about the same, but we would expect these data to be normally distributed (normal distribution is more natural when talking about weights, lengths, heights), versus the gamma distribution was created for modeling wait times/rates of arrival. 
+
+
+```
+
+#Modeling time of year in months (categorical) vs. continuously
+```{r}
+
+#Month as an integer
+m1_month <- glmmTMB(obs_FL ~ Sex + Island + Year + Month + Sex:Island + Sex:Month + Island:Month, data = lmm_data, family=gaussian) 
+plot(simulateResiduals(fittedModel = m1_month))
+summary(m1_month)
+AICc(m1_month) #1174
+
+#Time of year continuous: spline over day of year (df=12) 
+m1_day_continuous <- glmmTMB(obs_FL ~ Sex + Island + Year + ns(Day_of_year, df=12 ) + Sex:Island + Sex:Month + Island:Month, data = lmm_data, family=gaussian) 
+plot(simulateResiduals(m1_day_continuous))
+summary(m1_day_continuous) #this confirms that there is a 12x per year cycle that helps to explain variation in fork length. This cycle does not exactly match to month (otherwise both models would perform equally well and this one performs better). 
+AICc(m1_day_continuous) #1140
+
+#Overall all models confirm that the sampled moi fork lengths vary across the time of year
+
+#We decided to still use "Month" as a variable in our models to aid interpretability and because the hypotheses we are testing are specified by month. e.g "Male moi are larger in September on 'Oahu"
+
+```
+
+
+#Testing whether a mixed model is more appropriate (random effects): No
+```{r}
+#We are interested in the individual effects of Sex, Island, Month and Year so it does not make sense to model them as random variables. 
+
+#comparing linear model vs linear mixed model
+m1_normal <- glmmTMB(obs_FL ~ Sex + Island + Year + Month + Sex:Island + Sex:Month + Island:Month, data = lmm_data, family=gaussian) 
+plot(simulateResiduals(m1_normal))
+summary(m1_normal) 
+AICc(m1_normal) #1174
+
+
+#linear mixed model
+m1_yr_random <- glmmTMB(obs_FL ~ Sex + Island + (1|Year) + Month + Sex:Island + Sex:Month + Island:Month, data = lmm_data, family=gaussian ) 
+plot(simulateResiduals(m1_yr_random)) 
+summary(m1_yr_random)
+AICc(m1_yr_random) #1170 (if Island:Month is removed)
+
+
+#Modeling year as a fixed variable because we are interested in looking at the variation between years
+
+```
+
+#Model Selection
+Evaluate according to AICC (best for small sample sizes)
+```{r}
+
+#No interaction effects
+m1 <- glmmTMB(obs_FL ~ Sex + Island + Month + Year, data = lmm_data, family = gaussian) 
+summary(m1)
+plot(simulateResiduals(m1)) 
+testDispersion(m1)
+AICc(m1)
+#aicc:1188
+sst <- sum((lmm_data$obs_FL - mean(lmm_data$obs_FL))^2)
+sse <- sum((residuals(m1))^2)
+r2 <- 1 - sse / sst
+#r2: 0.6533425
+
+#Only interaction term of interest
+m2 <- glmmTMB(obs_FL ~ Sex + Island + Month + Year + Sex:Island, data = lmm_data, family = gaussian) 
+summary(m2)
+plot(simulateResiduals(m2))
+testDispersion(m2)
+AICc(m2)
+#aicc: 1173
+sst <- sum((lmm_data$obs_FL - mean(lmm_data$obs_FL))^2)
+sse <- sum((residuals(m2))^2)
+r2 <- 1 - sse / sst
+#r2: 0.7222868
+
+#All interaction terms
+m3 <- glmmTMB(obs_FL ~ Sex + Island + Month + Year + Sex:Island + Sex:Month + Island:Month , data = lmm_data, family = gaussian) 
+summary(m3)
+plot(simulateResiduals(m3)) 
+testDispersion(m3)
+AICc(m3)
+#aicc:1174.756
+sst <- sum((lmm_data$obs_FL - mean(lmm_data$obs_FL))^2)
+sse <- sum((residuals(m3))^2)
+r2 <- 1 - sse / sst
+r2 #r2: 0.7504138
+
+#All interaction effects have significant terms, and this model (M3) performs well so we will select it over the others.  
+
+```
+
+#Final Model 
+```{r}
+
+m_final <- m3
+
+summary(m_final)
+plot(simulateResiduals(m_final)) 
+testDispersion(m_final)
+AICc(m_final) #1174.756
+
+#Calculating an R2 (equivalent)
+#Source: https://stats.stackexchange.com/questions/477598/equivalent-of-r-squared-in-generalized-linear-model-regression-results
+sst <- sum((lmm_data$obs_FL - mean(lmm_data$obs_FL))^2)
+sse <- sum((residuals(m_final))^2)
+r2 <- 1 - sse / sst
+r2 #r2: 0.7504138
+
+
+```
+#Final Model Interpretation
+
+#1. In February and April 2024 on Maui females were reaching maturity at smaller sizes. 
+#2. In September 2024 on 'Oahu males were developing at larger sizes.
+
+```{r}
+drop1(m_final, test = "Chisq") 
+
+#Significant (p<0.0001) differences in fork length between sexes among Islands
+
+#Approaching significant differences in the linear relationship between in fork length and Month among Islands (p<0.1)
+
+#Non-significant differences the linear relationship between fork length and Year 
+
+emmeans(m_final, ~ Sex:Island)
+
+##FEMALES
+#Create dataframe with emmeans output
+emmeans_data <- tibble::tribble(
+  ~Sex,    ~Island,      ~emmean, ~SE,  ~df, ~lower.CL, ~upper.CL,
+  "Female", "Maui",       303,     8.98, 98,  285,       321,
+  "Female", "Kauaʻi",     324,     13.00, 98,  299,       350,
+  "Female", "Hawaiʻi",    333,     9.56, 98,  314,       352,
+  "Female", "Oʻahu",      371,     17.60, 98,  336,       406,
+  "Female", "Molokai",    476,     50.50, 98,  375,       576
+)
+
+#Reorder the islands for a cleaner plot (by mean)
+emmeans_data$Island <- reorder(emmeans_data$Island, emmeans_data$emmean)
+
+#Plot
+females <- ggplot(emmeans_data, aes(x = Island, y = emmean)) +
+  geom_errorbar(aes(ymin = lower.CL, ymax = upper.CL), width = 0.2,   linewidth = 0.6) + 
+  geom_point(size = 4,color = "darkblue") + 
+  labs(title = "Female Fork Length - Estimated Mean Value by Island",
+       subtitle = "Showing Upper and Lower Confidence Levels",
+       x = "Island",
+       y = "Estimated Mean (emmean)") +
+  theme_minimal(base_size = 12) +
+  coord_flip()
+#Captured Maui females are smaller than the other islands
+ 
+
+##MALES
+#Create dataframe with emmeans output
+emmeans_data_male <- tibble::tribble(
+  ~Sex,    ~Island,      ~emmean, ~SE,   ~df, ~lower.CL, ~upper.CL,
+  "Male",  "Molokai",    185,     19.00, 98,  148,       223,
+  "Male",  "Hawaiʻi",    241,     10.10, 98,  221,       261,
+  "Male",  "Kauaʻi",     287,     14.20, 98,  259,       315,
+  "Male",  "Maui",       267,     30.10, 98,  207,       326,
+  "Male",  "Oʻahu",      344,     13.60, 98,  317,       371
+)
+
+#Reorder the islands for a cleaner plot (by mean)
+emmeans_data_male$Island <- reorder(emmeans_data_male$Island, emmeans_data_male$emmean)
+
+#Plot
+males <- ggplot(emmeans_data_male, aes(x = Island, y = emmean)) +
+  geom_errorbar(aes(ymin = lower.CL, ymax = upper.CL), width = 0.2,
+                linewidth = 0.8) +
+  geom_point(size = 4, color = "orange") + 
+  labs(title = "Estimated Mean Value by Island (Males)",
+       subtitle = "Showing Upper and Lower Confidence Levels",
+       x = "Island",
+       y = "Estimated Mean (emmean)") +
+  theme_minimal(base_size = 14) +
+  coord_flip()
+#Captured 'Oahu males are larger than the other islands
+
+### Combined plot
+combined_data <- rbind(emmeans_data, emmeans_data_male)
+#Reorder the islands (by female eemean)
+combined_data$Island <- factor(combined_data$Island, levels = reorder(emmeans_data$Island, emmeans_data$emmean) |> levels())
+
+combined_plot <- ggplot(combined_data, aes(x = Island, y = emmean, color = Sex)) +
+  geom_errorbar(aes(ymin = lower.CL, ymax = upper.CL), width = 0.2, linewidth = 0.6, position = position_dodge(width = 0.5)) +
+  geom_point(size = 4, position = position_dodge(width = 0.5)) +
+  labs(title = "Moi: Estimated Mean Fork Length by Island and Sex",
+       subtitle = "Showing Upper and Lower Confidence Levels",
+       x = "Island",
+       y = "Moi Mean Fork Length (mm) Linear Model Estimate") +
+  theme_minimal(base_size = 10) +
+  scale_color_manual(values = c("Female" = "darkblue", "Male" = "orange")) +
+  coord_flip()
+
+combined_plot
+
+```
+
+#Additional analysis: targeted linear models for the two main hypotheses, with temporal variables as random effects and month as a factor
+1. Are female moi on Maui smaller than females on other islands?
+2. Are male moi on 'Oahu larger than males on other islands?
+
+```{r}
+
+females <- lmm_data %>% filter(Sex == "Female")
+males <- lmm_data %>% filter(Sex == "Male")
+
+#1. Are female moi on Maui smaller than females on other islands?
+m <- glmmTMB(obs_FL ~ Island + (1|Month_f) + (1|Year), data = females, family= gaussian)
+summary(m)
+#at p<0.0001 significance level the sampled female moi on Maui are smaller than those on the other islands, controlling for the effect of year and month. 
+
+#2. Are male moi on O'ahu larger than males on other islands?
+o <- glmmTMB(obs_FL ~ Island + (1|Month_f) + (1|Year), data = males, family = gaussian)
+summary(o)
+#at p<0.0001 significance level the sampled male moi on O'ahu are larger than those on the other islands, controlling for the effect of year and month. 
+
+```
+
+
+
+
+# Analysis for Spawning Period (Molokai Only)
+
+**Input:**
+
+1.  *10b_raw-data.csv*
+
+**Output:**
+
+1.  *10b_all-analysis.csv*
+2.  *10b_Fig4-plot.png*
+
+Load and format data
+
+```{r}
+
+#read in raw data
+fig4data <- read.csv("10b_raw-data.csv")
+
+#Rename Columns
+#fig4data <- fig4data %>% rename(
+#  Day_of_year = Day.of.the.Year,
+#  Spawn_evidence = Evidence.of.Spawning,
+#  Island = Location,
+#)
+
+#Format Columns
+fig4data$Date <- as.Date(fig4data$Date,"%m/%d/%Y")
+fig4data$Day_of_year <- as.numeric(fig4data$Day_of_year)
+fig4data$Island <- as.factor(fig4data$Island)
+
+```
+
+H0: Null Hypothesis Current State of Hawai’i regulation assumes that the
+vast majority of spawning activity occurs within the protected
+June-August window. Spawning activity outside this window is negligible
+or non-existent.
+
+\
+Mean (𝛍) 212 day of year Range 92 days
+
+3 Scenarios:
+
+*Range is one Standard Deviation (least conservative) (σ=23.5)*
+
+*Range is two Standard Deviations (middle conservative) (σ=28)*
+
+*Range is three Standard Deviations (highly conservative) (σ=35.9)*
+
+```{r}
+#Summarize empirical data
+fig4data_analysis <- fig4data %>% 
+  group_by(Date, Spawn_evidence) %>% 
+  mutate(
+  sample_n = n(),
+  confirmed_spawn_k = sum(Spawn_evidence == "Yes")
+) %>% 
+  distinct() %>% 
+  group_by(Date) %>% 
+  mutate(
+    sample_per_day = sum(sample_n)
+  )
+  
+
+#set parameters
+
+H0_mean_day_of_year <- 212
+
+LC_sd <- 23.5
+MC_sd <- 28
+HC_sd <- 35.9
+
+```
+
+Analysis
+
+```{r}
+###Step 1: Calculation of the probability (p) using normal distribution		
+# Question: What the probability to observe spawning at Day X and beyond, under H0?			
+
+#Z score calculations
+
+fig4spawn <- fig4data_analysis %>% filter(Spawn_evidence=="Yes") %>%   
+  mutate(
+    LC_Z_score = ((Day_of_year)-(H0_mean_day_of_year))/LC_sd,
+    MC_Z_score = ((Day_of_year)-(H0_mean_day_of_year))/MC_sd,
+    HC_Z_score = ((Day_of_year)-(H0_mean_day_of_year))/HC_sd
+  )
+
+#One-tailed probability
+#P(Z>zcal) - 1 tail			
+fig4spawn <- fig4spawn %>% 
+  mutate(
+    LC_p = 1-pnorm(abs(LC_Z_score)),
+    MC_p = 1-pnorm(abs(MC_Z_score)),
+    HC_p = 1-pnorm(abs(HC_Z_score)),
+  )
+
+###Step 2: Calculation of p-value 
+#Answering the question, what is the probability of observing at least your sample (e.g. 5/6 spawning) under H0 			
+#Equation: P(X>=5) = P(X=5)+ P(x=6) with  P(X=k) = C(n, k) * p^k * (1-p)^(n-k)	
+#Use the dbinom package in R
+
+fig4spawn <- fig4spawn %>% 
+  mutate(
+    pvalue_LC = dbinom(x= confirmed_spawn_k, size = sample_n, prob= LC_p),
+    pvalue_MC = dbinom(x= confirmed_spawn_k, size = sample_n, prob= MC_p),
+    pvalue_HC = dbinom(x= confirmed_spawn_k, size = sample_n, prob= HC_p),
+  )
+
+#Save file
+write.csv(fig4spawn, "10b_all-analysis.csv")
+
+```
+
+Visualization
+
+```{r}
+
+# Define the x-axis range for the density curves
+x_axis_days_of_year <- 1:365
+
+# Find the absolute maximum density across ALL 3 curves
+Molokai_max_density <- max(
+  dnorm(x_axis_days_of_year, mean = H0_mean_day_of_year, sd = LC_sd),
+  dnorm(x_axis_days_of_year, mean = H0_mean_day_of_year, sd = MC_sd),
+  dnorm(x_axis_days_of_year, mean = H0_mean_day_of_year, sd = HC_sd)
+)
+
+# Maximum frequency across ALL data
+Molokai_max_freq <- max(fig4spawn$sample_n, na.rm = TRUE)
+
+# Scaling factor to align the two y-axes
+height_multiplier <- 0.9
+scaling_factor <- (Molokai_max_freq / Molokai_max_density) / height_multiplier
+
+# --- 3. Plotting with ggplot2 ---
+
+# Define colors for the plot elements
+color_curve_line <- "#0077b6"
+color_curve_fill <- "aliceblue"
+color_spawn_yes <- "darkblue"
+color_spawn_no <- "grey"
+
+
+# Create the plot
+Fig4_summary_updated <- ggplot() +
+
+  # Distribution Curves (Low, Medium, High Conservation)
+  stat_function(fun = dnorm, args = list(mean = H0_mean_day_of_year, sd = HC_sd), geom = "area", fill = color_curve_fill, alpha = 0.4) +
+  stat_function(fun = dnorm, args = list(mean = H0_mean_day_of_year, sd = HC_sd), geom = "line", color = color_curve_line, linewidth = 0.6, alpha = 0.6) +
+  stat_function(fun = dnorm, args = list(mean = H0_mean_day_of_year, sd = MC_sd), geom = "area", fill = color_curve_fill, alpha = 0.5) +
+  stat_function(fun = dnorm, args = list(mean = H0_mean_day_of_year, sd = MC_sd), geom = "line", color = color_curve_line, linewidth = 0.6, alpha = 0.6) +
+  stat_function(fun = dnorm, args = list(mean = H0_mean_day_of_year, sd = LC_sd), geom = "area", fill = color_curve_fill, alpha = 0.7) +
+  stat_function(fun = dnorm, args = list(mean = H0_mean_day_of_year, sd = LC_sd), geom = "line", color = color_curve_line, linewidth = 0.6, alpha = 0.7) +
+  
+  # Add the observed data points, with color mapped to Spawn_evidence
+  geom_jitter(
+    data = fig4data_analysis,
+    aes(x = Day_of_year, y = sample_n / scaling_factor, fill = Spawn_evidence),
+    shape = 21, 
+    color = "white", 
+    alpha = 0.8,
+    size = 4,
+    stroke = 0.4
+  ) +
+  
+  #Format
+  scale_fill_manual(
+    name = "Spawning Evidence",
+    values = c("Yes" = color_spawn_yes, "No" = color_spawn_no)
+  ) +
+  
+  #Scales and axes
+  scale_x_continuous(limits = c(100, 400)) +
+  scale_y_continuous(
+    name = "Density (Normal distribution)",
+    sec.axis = sec_axis(
+      trans = ~ . * scaling_factor,
+      name = "Number of samples (per trip)"
+    )
+  ) +
+  
+  #Titles
+  labs(
+    title = "Spawn observations outside of expected spawning distributions",
+    subtitle = "Molokai Island only",
+    x = "Day of Year"
+  ) +
+  
+  # Apply a minimal theme and custom styling
+  theme_minimal(base_family = "sans") +
+  theme(
+    plot.title = element_markdown(size = 14, face = "bold", margin = margin(b = 10)),
+    plot.subtitle = element_text(size = 12, color = "grey50", margin = margin(b = 20)),
+    plot.caption = element_text(size = 9, color = "grey60", hjust = 1),
+    axis.title = element_text(size = 12, face = "bold"),
+    axis.text = element_text(size = 11),
+    axis.title.y.left = element_text(color = color_curve_line),
+    axis.text.y.left = element_text(color = color_curve_line),
+    axis.title.y.right = element_text(color = "black"), # Secondary axis title color
+    axis.text.y.right = element_text(color = "black"),  # Secondary axis text color
+    panel.grid.major = element_line(color = "lightgrey", size = 0.5),
+    panel.grid.minor = element_blank(),
+    plot.title.position = "plot",
+    legend.position = "bottom" # Move legend to the bottom
+  )
+
+# Print the plot
+print(Fig4_summary_updated)
+
+# To save the plot
+ggsave("10b_Fig4-plot.png", plot = Fig4_summary_updated, width = 12, height = 8, dpi = 300)
+
+
+```
+
+Manually add color and p-values to data points (done in Illustrator)
+
+# Save all data objects into one R Workbook
+
+```{r}
+install.packages("writexl")
+library(writexl)
+
+#Named list of data frames
+objects_to_save <- list(
+  "10a_raw-data"= fig3data,
+  "10a_all-analysis" = fig3analysis,
+  "10a_p<0.001" = Fig3analysis_key,
+  "10b_raw-data" = fig4data,
+  "10b_all-analysis"=fig4spawn
+)
+
+#Save to excel file
+write_xlsx(objects_to_save, path = "Supplementary_10ab_Data-Tables.xlsx")
+
+```
