@@ -1,0 +1,48 @@
+Journal: Proceedings of the Royal Society B: Biological Sciences 
+
+DOI: 10.1098/rspb.2025.2028 
+
+Title: Co-creating intergenerational knowledge about Hawaiian moi (Polydactylus sexfilis) reproductive cycles in a changing climate 
+
+Authors: Kelson “Mac” Poepoe 1* , Kēhau Springer 1* , Marina Luccioni 1,3* , Nakoa Goo 1* , Pekelo Lind 1* , Hiʻilei Kawelo 1* , Will Maʻe-Huihui 1* , Laila Kaupu 1* , Makani Gregg 1* , Keliʻi Alapaʻi 1* , Kanoe Alapaʻi-Hashimoto 1* , Kāneholani Lind 1 , Avery Kahoʻokaulana 1 , Alex Connelly 1,2* 
+
+* Authors contributed equally to this work 
+1 Nā Kai ‘Ewalu 
+2 Kua ‘Āina Ulu ‘Auamo 
+3 Stanford University
+
+Summary: Moi (Polydactylus sexfilis) fish are an important species in Hawaiʻi, traditionally monitored by lawaiʻa (fishers) and konohiki (land-managers). Moi experienced significant declines, and are now protected from fishing from June-August. However, elder Uncle Mac Poepoe recently observed spawning season changes outside of the known protected period. In response, he formed Nā Kai ʻEwalu, a collective of lawaiʻa, to study these changes across islands. This paper details our research process rooted in indigenous knowledge and driven by Kanaka ʻŌiwi (Native Hawaiians). Our Indigenous-led research uses traditional knowledge and conventional biology to steward biocultural resources, offering a model for fisheries management globally.
+
+
+Supplementary 9: R-markdown file for Quantitative Data Analysis (Moi Spawning Period and Moi Size-at-Sex). 
+File type: RMarkdown file 
+Required: RStudio version (2025.05.1+513) and R version R 4.5.1. and Input and Output data files which are provided in the Supplementary 10 excel workbook and as CSV files. The sheets of the workbook should be downloaded as .csv files to run with the code.
+
+We performed statistical analyses using RStudio version (2025.05.1+513) and R version R 4.5.1. We used the R base package for calculations alongside the dplyr and ggplot2 packages for data manipulation and visualization. These are commented in the Markdown file. 
+
+Supplementary 10a and 10b: Data Tables and Visualization for Quantitative Data Analysis of (a) Moi Size-at-Sex and (b) Moi Spawning Period.
+File type: Excel workbook Required: Microsoft Excel software.
+Also provided as CSV files. 
+
+Column names:
+Date - YYYY-MM-DD
+obs_FL - fork length of the fish in mm
+Sex - fish sex “Male” or “Female” or “Hermaphrodite”
+Island - Maui, O’ahu, Hawai’i, Kaua’i, or Molokai
+Trip - MM/DD/YYYY
+Year - YYYY
+n - used for statistical calculations for the Binomial Probability Formula P(X=k) = C(n, k) * p^k * (1-p)^(n-k), see Supplementary 8 and 9. 
+k - used for statistical calculations for the Binomial Probability Formula P(X=k) = C(n, k) * p^k * (1-p)^(n-k), see Supplementary 8 and 9. 
+expected_mean - used for statistical calculations for the Binomial Probability Formula P(X=k) = C(n, k) * p^k * (1-p)^(n-k), see Supplementary 8
+LC - used for statistical calculations LC= less conservative, see Supplementary 8 and 9. 
+MC - used for statistical calculations MC= middle conservative, see Supplementary 8 and 9. 
+HC - used for statistical calculations HC= highly conservative, see Supplementary 8 and 9. 
+absZ - absolute Z score used for statistical calculations, see Supplementary 8 and 9. 
+pdf - probability density function used for statistical calculations, see Supplementary 8 and 9. 
+p_value - p-value as used in biostatistics. 
+mean_FL - mean fork length in mm
+size_difference - size difference of fork lengths in mm. 
+Day_of_year - day of year from 1 to 365
+spawn_evidence - evidence of spawning as "Yes" or "No"
+n_island - number per island. 
+
